@@ -1,0 +1,7 @@
+<html>
+<body>
+<script>
+	document.getElementbyId("hello").innerHTML = ("Hello World, this is Dhaval Kapgate");
+</script>
+</body>
+</html>

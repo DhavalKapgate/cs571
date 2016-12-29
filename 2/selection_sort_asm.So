@@ -1,0 +1,61 @@
+.code32 
+.text
+	.align 4 
+
+.global selection_sort_asm 
+selection_sort_asm:
+	pushl %ebp
+	movl %esp, %ebp
+	subl $16, %esp
+	movl 12(%ebp), %ebx
+	dec %ebx
+	movl %ebx, 16(%esp)
+	movl $0, 12(%esp)	//current=0
+	movl 8(%ebp), %eax	//&A[0]->eax
+	movl 12(%esp), %ecx 	
+
+for_outer:
+	cmpl %ecx, %ebx		//ecx->current ebx->num_elem=3
+	jc out			//if all elements are placed exit
+	movl %ecx, 8(%esp)	//ecx->current->position//position=current
+	inc %ecx		//ecx->next_num(current+1)
+	movl %ecx, 4(%esp) 	//next_num in stack
+
+for_inner:
+	movl 16(%esp),%ebx	//ebx->next_num
+	cmpl %ecx, %ebx		//ebx=num_ele, ecx=next_num
+	jc if_two		//if num_elem<next_num
+
+if_one:
+	movl 8(%esp), %ebx		//position->ebx
+	movl (%eax, %ebx, 4), %edx	//A[pos]->edx
+	movl (%eax, %ecx, 4), %ebx	//A[next_num]->ebx
+	cmpl %ebx, %edx
+	jc next_num			//if A[pos]<=A[next_num] next_num++
+	movl %ecx, 8(%esp)		//else position=next_num
+
+next_num:
+	inc %ecx			//next_num++
+	jmp for_inner 	
+
+if_two:
+	movl 8(%esp), %ebx		//position->ebx
+	movl 12(%esp), %edx		//current->edx
+	cmpl %ebx, %edx			
+	je inc_current			//if(pos==current)skip
+
+	movl (%eax, %edx, 4), %ecx	//A[current]->ecx
+	movl (%eax, %ebx, 4), %edx	//A[position]->edx
+	movl %ecx, (%eax, %ebx, 4)	//ecx->A[position]
+	movl 12(%esp), %ecx		//current->ecx
+	movl %edx, (%eax, %ecx, 4)	//edx->A[current]
+	movl %ecx, %edx			//current->edx
+
+inc_current:
+	inc %edx			//current++
+	movl %edx, %ecx			//current->ecx
+	movl 16(%esp), %ebx		//num_elem->ebx
+	jmp for_outer 
+	
+out:
+	ret	
